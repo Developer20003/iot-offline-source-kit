@@ -1,0 +1,27 @@
+# Private information
+private-backups/
+*.dump
+*.env
+!offline-bundle/config/runtime/compose/thingsboard.env
+
+# Runtime and generated data
+logs/
+caches/
+sources/
+/runtime/
+node_modules/
+.gradle/
+
+# Large release assets
+*.bundle
+*.jar
+*.tgz
+*.tar.gz
+!offline-bundle/installer-scripts.tar.gz
+*.tar
+*.zip
+*.7z
+
+# Local files
+*.log
+.DS_Store

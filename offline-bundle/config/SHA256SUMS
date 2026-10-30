@@ -1,0 +1,6 @@
+bb48a64cb188d3d5adaf9ddb0b6bafae9cfe1a5ca25a3aa67a481013793b8f0d  ./compose.yaml
+3592c141463d61fd3ef93e145c35262cfed0ff84438d55461e33bc1fa5c1586b  ./runtime/compose/thingsboard.env
+ab640525f7f1e673b63e3f82f74524a0520ab3e076138e4be9393dd21c9fd31b  ./runtime/emqx/emqx.env.example
+05411b39f92859e004b3d36ca669b4b2ec6568c81cd62c0b7119039554e7bf9e  ./runtime/kafka/config/server.properties
+c1890c371858f5ab87cc28dc1f1cf92c98c5e485d2561acb653bb6a0c89289e1  ./runtime/postgres/postgres.env.example
+d46f8c8fc7eeb9685b996bfb82dc3ac76a242eb753671db92589adbf86878de7  ./runtime/zigbee2mqtt/configuration.template.yaml

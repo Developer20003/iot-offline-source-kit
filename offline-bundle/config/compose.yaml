@@ -1,0 +1,115 @@
+name: iot-offline
+
+services:
+
+  postgres:
+    image: postgres:17
+    container_name: iot-postgres
+    restart: unless-stopped
+
+    env_file:
+      - ./runtime/postgres/postgres.env
+
+    volumes:
+      - iot-postgres-data:/var/lib/postgresql/data
+
+    networks:
+      - iot-backend
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"'
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  emqx:
+    image: ghcr.io/emqx/emqx-builder/6.1-8:1.19.1-28.4.1-4-ubuntu24.04
+    container_name: iot-emqx
+    hostname: node1.emqx.local
+    user: "1000:1000"
+    working_dir: /opt/emqx
+    restart: unless-stopped
+
+    entrypoint: ["/bin/bash", "-lc"]
+    command: "exec /opt/emqx/bin/emqx foreground"
+
+    env_file:
+      - ./runtime/emqx/emqx.env
+
+    volumes:
+      - ./sources/emqx/_build/emqx-enterprise/rel/emqx:/opt/emqx
+      - ./runtime/emqx/data:/opt/emqx/data
+      - ./logs/emqx:/opt/emqx/log
+
+    ports:
+      - "127.0.0.1:1883:1883"
+      - "127.0.0.1:18083:18083"
+
+    networks:
+      iot-backend:
+        aliases:
+          - node1.emqx.local
+
+  kafka:
+    image: eclipse-temurin:17-jdk
+    container_name: iot-kafka
+    hostname: iot-kafka
+    user: "1000:1000"
+    working_dir: /opt/kafka
+    restart: "no"
+
+    entrypoint: ["/bin/bash", "-lc"]
+    command: "exec /opt/kafka/bin/kafka-server-start.sh /etc/kafka/server.properties"
+
+    environment:
+      KAFKA_HEAP_OPTS: "-Xms256m -Xmx768m"
+
+    volumes:
+      - ./runtime/kafka/config:/etc/kafka:ro
+      - ./runtime/kafka/distribution:/opt/kafka
+      - ./runtime/kafka/data:/var/lib/kafka/data
+      - ./logs/kafka:/opt/kafka/logs
+
+    ports:
+      - "127.0.0.1:9092:9092"
+
+    networks:
+      - iot-backend
+
+  thingsboard:
+    image: maven:3.9.9-eclipse-temurin-17
+    container_name: iot-thingsboard
+    user: "1000:1000"
+    restart: unless-stopped
+
+    entrypoint: ["/bin/sh", "-lc"]
+    command:
+      - 'export SPRING_DATASOURCE_PASSWORD="$$POSTGRES_PASSWORD"; exec java -jar /thingsboard.jar'
+
+    env_file:
+      - ./runtime/postgres/postgres.env
+      - ./runtime/compose/thingsboard.env
+
+    volumes:
+      - ./sources/thingsboard/application/target/thingsboard-4.3.1.6-boot.jar:/thingsboard.jar:ro
+      - ./runtime/thingsboard/install-data:/install-data
+
+    ports:
+      - "127.0.0.1:8080:8080"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    networks:
+      - iot-backend
+
+networks:
+  iot-backend:
+    external: true
+
+volumes:
+  iot-postgres-data:
+    external: true

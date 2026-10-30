@@ -1,0 +1,15 @@
+version: 5
+
+mqtt:
+  server: 'mqtt://iot-emqx:1883'
+  base_topic: zigbee2mqtt
+
+frontend:
+  enabled: true
+  port: 8090
+
+homeassistant:
+  enabled: false
+
+# Add serial.port and serial.adapter for your
+# actual Zigbee coordinator before starting.
